@@ -39,6 +39,7 @@
     "registry": "http://registry.npmjs.org/"
   },
   "dependencies": {
+    "@babel/parser": "^7.16.4",
     "@babel/plugin-syntax-jsx": "^7.16.0",
     "@babel/plugin-transform-react-jsx": "^7.16.0",
     "@babel/preset-react": "^7.16.0",

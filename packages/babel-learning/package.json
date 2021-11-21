@@ -18,5 +18,10 @@
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "dependencies": {
+    "@babel/generator": "^7.16.0",
+    "@babel/template": "^7.16.0",
+    "@babel/traverse": "^7.16.3"
   }
 }
