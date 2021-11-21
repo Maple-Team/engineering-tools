@@ -59,7 +59,5 @@ var a = 2;`)
 var a = 2 * 3;`)
     })
   })
-  describe('auto inject function and import if the function not be imported', () => {
-
-  })
+  describe('auto inject function and import if the function not be imported', () => {})
 })
