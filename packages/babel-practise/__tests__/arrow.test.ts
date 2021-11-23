@@ -1,4 +1,4 @@
-import { es6to5, replaceOperator, autoInjected } from '../src'
+import { es6to5, replaceOperator } from '../src'
 
 describe('babel test cases', () => {
   describe('arrow fn transform to normal function', () => {

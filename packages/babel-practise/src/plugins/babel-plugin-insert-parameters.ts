@@ -1,10 +1,13 @@
 import generate from '@babel/generator'
 import template from '@babel/template'
 import { arrayExpression } from '@babel/types'
+import type * as babel from '@babel/core'
+import type { PluginObj } from '@babel/core'
 
+type Babel = typeof babel
 const targetCalleeName = ['log', 'info', 'error', 'debug'].map((item) => `console.${item}`)
 
-export default (): babel.PluginObj => {
+export default ({ version }: Babel): PluginObj => {
   return {
     name: '@babel/plugin-insert-parameters',
     visitor: {

@@ -2,6 +2,7 @@ import { parse, TransformOptions } from '@babel/core'
 import generate from '@babel/generator'
 import traverse from '@babel/traverse'
 import * as t from '@babel/types'
+import BabelPluginInsertParameters from './plugins/babel-plugin-insert-parameters'
 
 const options: TransformOptions = {
   ast: true,
@@ -93,4 +94,4 @@ const autoInjected = (code: string | undefined | null): string => {
   })
   return generate(ast, {}, code).code
 }
-export { es6to5, replaceOperator, autoInjected }
+export { es6to5, replaceOperator, autoInjected, BabelPluginInsertParameters }
