@@ -10,4 +10,7 @@ export default {
   coverageProvider: 'v8',
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'json', 'node'],
   testMatch: ['**/__tests__/**/?(*.)+(spec|test).ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
+  transform: {
+    '^.+\\.(t|j)sx?$': ['@swc-node/jest'],
+  },
 }
