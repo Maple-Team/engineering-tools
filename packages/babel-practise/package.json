@@ -19,6 +19,7 @@
     "@swc-node/jest": "^1.4.1",
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.9",
+    "acorn": "^8.6.0",
     "babel-jest": "^27.0.2",
     "babel-plugin-import": "^1.13.3",
     "core-js": "^3.15.2",
