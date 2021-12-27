@@ -3,6 +3,7 @@ import generate from '@babel/generator'
 import traverse from '@babel/traverse'
 import * as t from '@babel/types'
 import BabelPluginInsertParameters from './plugins/babel-plugin-insert-parameters'
+import BabelPluginDimensionResponsive from './plugins/babel-plugin-dimension-responsive'
 
 const options: TransformOptions = {
   ast: true,
@@ -94,4 +95,4 @@ const autoInjected = (code: string | undefined | null): string => {
   })
   return generate(ast, {}, code).code
 }
-export { es6to5, replaceOperator, autoInjected, BabelPluginInsertParameters }
+export { es6to5, replaceOperator, autoInjected, BabelPluginInsertParameters, BabelPluginDimensionResponsive }
