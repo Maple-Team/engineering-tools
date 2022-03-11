@@ -1,81 +1,161 @@
-import type { ParserInterface, Dom } from "./type";
+import type {
+  ParserInterface,
+  MapleComment,
+  MapleElement,
+  MapleNode,
+  MapleText,
+} from "./type";
+import assert from "assert";
+import fs from "fs";
 
-//@https://cloud.tencent.com/developer/article/1602920
-class Parser implements ParserInterface {
-  source: string;
-  pos: number;
-  constructor(source: string) {
-    this.source = source;
+function* generator(str: string) {
+  for (const iterator of str.split("")) {
+    yield iterator;
   }
+}
+//@https://cloud.tencent.com/developer/article/1602920
+/**
+ * html字符串解析类
+ * 解析思路：利用游标不停的向后移动来遍历每一个字符
+ */
+class Parser implements ParserInterface {
+  source: string[];
+  pos: number = 0;
+  constructor(sour: string) {
+    this.source = sour.split("");
+    console.log(this.source);
+  }
+
   nextChar(): string {
-    throw new Error("Method not implemented.");
+    try {
+      console.log(this.source[this.pos + 1]);
+      return this.source[this.pos + 1];
+    } catch (error) {
+      // NOTE: 数组越界
+      throw error;
+    }
+  }
+  consumeChar(): string {
+    const str = this.source[this.pos];
+    this.pos++;
+    return str;
   }
   startWith(str: string): boolean {
-    throw new Error("Method not implemented.");
+    return this.source[this.pos].startsWith(str);
   }
   consumeWhile(cb: (str: string) => boolean): string {
-    throw new Error("Method not implemented.");
+    let result: string[] = [];
+    while (!this.eof() && cb(this.nextChar())) {
+      result.push(this.consumeChar());
+    }
+    return result.join("");
   }
-  consumeWhitespace(): boolean {
-    throw new Error("Method not implemented.");
+  consumeWhitespace(): string {
+    return this.consumeWhile((str: string) => str !== "");
   }
   parseTagOrAttributeName(): string {
-    throw new Error("Method not implemented.");
+    return this.consumeWhile((c: string) => /[a-zA-Z0-9]/.test(c));
   }
-  getNode(): Node {
-    throw new Error("Method not implemented.");
+  parseNode(): MapleNode {
+    if (this.nextChar() === "<") {
+      return this.getElement();
+    } else {
+      return this.getText();
+    }
   }
-  getText(): Text {
-    throw new Error("Method not implemented.");
+  getText(): MapleText {
+    return new TextNode(this.consumeWhile((c) => c !== "<"));
   }
-  getElement(): Element {
-    throw new Error("Method not implemented.");
+  getElement(): MapleElement {
+    assert(this.consumeChar(), "<");
+    const tagName = this.parseTagOrAttributeName();
+    const attrs = this.parseAttrbutes();
+    assert(this.consumeChar() === ">");
+    const children = this.parseNodes();
+
+    assert(this.consumeChar() === "<");
+    assert(this.consumeChar() === "/");
+    assert(this.parseTagOrAttributeName() === tagName);
+    assert(this.consumeChar() === ">");
+
+    return new ElementNode(tagName, attrs, children);
   }
   parseAttr(): Record<string, string> {
-    throw new Error("Method not implemented.");
+    const attrName = this.parseTagOrAttributeName();
+    assert(this.consumeChar() === "=");
+    const value = this.parseAttrValue();
+    return { [attrName]: value };
   }
   parseAttrValue(): string {
-    throw new Error("Method not implemented.");
+    const openQuote = this.consumeChar();
+    assert(openQuote === '"' || openQuote === "'");
+    const value = this.consumeWhile((c) => c !== openQuote);
+    assert(this.nextChar() === openQuote);
+    return value;
   }
-  parseAttrbutes(): Record<string, string> {
-    throw new Error("Method not implemented.");
+  parseAttrbutes(): Record<string, string>[] {
+    let attributes: Record<string, string>[] = [];
+    do {
+      this.consumeWhitespace();
+      const attrbute = this.parseAttr();
+      attributes.push(attrbute);
+    } while (this.nextChar() === ">");
+    return attributes;
   }
-  parseNodes(): Node[] {
-    throw new Error("Method not implemented.");
+  parseNodes(): MapleNode[] {
+    const nodes: MapleNode[] = [];
+    do {
+      this.consumeWhitespace();
+      nodes.push(this.parseNode());
+    } while (this.eof() || this.startWith("</"));
+    return nodes;
   }
-  parse(souce: string): Node {
-    throw new Error("Method not implemented.");
+  //@ts-ignore
+  static parse(souce: string): MapleNode {
+    const parser = new Parser(souce);
+    // const nodes = parser.parseNodes();
+    // if (nodes.length === 1) {
+    //   return nodes[0];
+    // } else {
+    //   return new ElementNode("html", [], nodes);
+    // }
   }
   eof(): boolean {
-    throw new Error("Method not implemented.");
-  }
-  consume(): string {
-    throw new Error("Method not implemented.");
+    return this.pos >= this.source.length;
   }
 }
-class TextNode implements Dom.Text {
-  nodeType: Dom.Text;
-  children: Dom.Node[];
+class TextNode implements MapleText {
+  content: string;
   toJSON(): string {
     return JSON.stringify(this);
   }
-  constructor(){
-    
+  constructor(content: string) {
+    this.content = content;
   }
 }
-class CommentNode implements Dom.Comment {
-  nodeType: Dom.Comment;
-  children: Dom.Node[];
+//@ts-ignore
+class CommentNode implements MapleComment {
   toJSON(): string {
     return JSON.stringify(this);
   }
 }
-class ElementNode implements Dom.Element {
+class ElementNode implements MapleElement {
   tagName: string;
-  attributes: Dom.AttributesMap;
-  nodeType: Dom.Element;
-  children: Dom.Node[];
+  attributes: Record<string, string>[];
+  children: MapleNode[];
   toJSON(): string {
     return JSON.stringify(this);
   }
+  constructor(
+    tagName: string,
+    attributes: Record<string, string>[],
+    children: MapleNode[]
+  ) {
+    this.tagName = tagName;
+    this.attributes = attributes;
+    this.children = children;
+  }
 }
+const content = fs.readFileSync("./example/text.html").toString();
+const result = Parser.parse(content);
+console.log(result.toJSON());

@@ -1,43 +1,49 @@
-export namespace Dom {
-  interface Node {
-    nodeType: NodeType;
-    children: Node[];
-    toJSON(): string;
-  }
-  type NodeType = Text | Element | Comment;
-  type AttributesMap = Record<string, string>;
+interface MapleNode {
+  children?: MapleNode[];
+  toJSON(): string;
+}
+type NodeType = MapleText | MapleElement | MapleComment;
 
-  interface Element extends Node {
-    tagName: string;
-    attributes: AttributesMap;
-    new (tag: string, data: AttributesMap, children: Node[]): Element;
-  }
-  interface Text extends Node {
-    new (content: string): Text;
-  }
-  interface Comment extends Node {
-    new (content: string): Comment;
-  }
+interface MapleElement extends MapleNode {
+  tagName: string;
+  attributes: AttributesMap;
+  // new (tag: string, data: AttributesMap, children: Node[]): Element;
+}
+interface MapleText extends MapleNode {
+  content: string;
+  // new (content: string): Text;
+}
+interface MapleComment extends MapleNode {
+  content: string;
+  // new (content: string): Comment;
 }
 
 export interface ParserInterface {
-  source: string;
+  source: string[];
   pos: number;
-  consume(): string;
   eof(): boolean;
+  /**
+   * 处理字符
+   */
+  consumeChar(): string;
+  /**
+   * 读取下一个char
+   * @returns
+   * @throws
+   */
   nextChar(): string;
   startWith(str: string): boolean;
   consumeWhile(cb: (str: string) => boolean): string;
-  consumeWhitespace(): boolean;
+  consumeWhitespace(): string;
   parseTagOrAttributeName(): string;
-  getNode(): Node;
-  getText(): Text;
-  getElement(): Element;
+
+  getText(): MapleText;
+  getElement(): MapleElement;
   parseAttr(): Record<string, string>;
   parseAttrValue(): string;
-  parseAttrbutes(): Record<string, string>;
-  parseNodes(): Node[];
-  parse(souce: string): Node;
+  parseAttrbutes(): Record<string, string>[];
+  parseNodes(): MapleNode[];
+  parseNode(): MapleNode;
 }
 declare var ParserInterface: {
   new (source: string): ParserInterface;
