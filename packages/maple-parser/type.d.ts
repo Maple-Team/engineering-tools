@@ -1,6 +1,5 @@
 interface MapleNode {
   children?: MapleNode[];
-  toJSON(): string;
 }
 type NodeType = MapleText | MapleElement | MapleComment;
 

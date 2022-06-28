@@ -23,12 +23,11 @@ class Parser implements ParserInterface {
   pos: number = 0;
   constructor(sour: string) {
     this.source = sour.split("");
-    console.log(this.source);
   }
 
   nextChar(): string {
     try {
-      console.log(this.source[this.pos + 1]);
+      console.log(this.source[this.pos + 1], this.pos, this.source.length);
       return this.source[this.pos + 1];
     } catch (error) {
       // NOTE: 数组越界
@@ -102,23 +101,31 @@ class Parser implements ParserInterface {
     } while (this.nextChar() === ">");
     return attributes;
   }
+  /**
+   *
+   * @returns
+   */
   parseNodes(): MapleNode[] {
     const nodes: MapleNode[] = [];
     do {
       this.consumeWhitespace();
       nodes.push(this.parseNode());
-    } while (this.eof() || this.startWith("</"));
+    } while (
+      !this.eof()
+      // || this.startWith("</")
+    );
     return nodes;
   }
-  //@ts-ignore
+
   static parse(souce: string): MapleNode {
     const parser = new Parser(souce);
-    // const nodes = parser.parseNodes();
-    // if (nodes.length === 1) {
-    //   return nodes[0];
-    // } else {
-    //   return new ElementNode("html", [], nodes);
-    // }
+
+    const nodes = parser.parseNodes();
+    if (nodes.length === 1) {
+      return nodes[0];
+    } else {
+      return new ElementNode("html", [], nodes);
+    }
   }
   eof(): boolean {
     return this.pos >= this.source.length;
@@ -126,26 +133,17 @@ class Parser implements ParserInterface {
 }
 class TextNode implements MapleText {
   content: string;
-  toJSON(): string {
-    return JSON.stringify(this);
-  }
   constructor(content: string) {
     this.content = content;
   }
 }
 //@ts-ignore
-class CommentNode implements MapleComment {
-  toJSON(): string {
-    return JSON.stringify(this);
-  }
-}
+class CommentNode implements MapleComment {}
 class ElementNode implements MapleElement {
   tagName: string;
   attributes: Record<string, string>[];
   children: MapleNode[];
-  toJSON(): string {
-    return JSON.stringify(this);
-  }
+
   constructor(
     tagName: string,
     attributes: Record<string, string>[],
@@ -158,4 +156,4 @@ class ElementNode implements MapleElement {
 }
 const content = fs.readFileSync("./example/text.html").toString();
 const result = Parser.parse(content);
-console.log(result.toJSON());
+console.log(JSON.stringify(result));
